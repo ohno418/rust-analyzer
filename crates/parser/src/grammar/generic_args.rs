@@ -11,7 +11,17 @@ pub(super) fn opt_generic_arg_list(p: &mut Parser<'_>, colon_colon_required: boo
         return;
     }
 
-    delimited(p, T![<], T![>], T![,], GENERIC_ARG_FIRST, generic_arg);
+    delimited(
+        p,
+        T![<],
+        T![>],
+        T![,],
+        GENERIC_ARG_FIRST,
+        generic_arg,
+        // test_err missing_generic_argument
+        // type T = S<i32, , i32>;
+        "expected a generic arguemnt",
+    );
     m.complete(p, GENERIC_ARG_LIST);
 }
 

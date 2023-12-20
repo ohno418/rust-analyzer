@@ -13,13 +13,23 @@ pub(super) fn opt_generic_param_list(p: &mut Parser<'_>) {
 fn generic_param_list(p: &mut Parser<'_>) {
     assert!(p.at(T![<]));
     let m = p.start();
-    delimited(p, T![<], T![>], T![,], GENERIC_PARAM_FIRST.union(ATTRIBUTE_FIRST), |p| {
-        // test generic_param_attribute
-        // fn foo<#[lt_attr] 'a, #[t_attr] T>() {}
-        let m = p.start();
-        attributes::outer_attrs(p);
-        generic_param(p, m)
-    });
+    delimited(
+        p,
+        T![<],
+        T![>],
+        T![,],
+        GENERIC_PARAM_FIRST.union(ATTRIBUTE_FIRST),
+        |p| {
+            // test generic_param_attribute
+            // fn foo<#[lt_attr] 'a, #[t_attr] T>() {}
+            let m = p.start();
+            attributes::outer_attrs(p);
+            generic_param(p, m)
+        },
+        // test_err missing_generic_param
+        // fn foo<i32, , i32>() {}
+        "expected a generic parameter",
+    );
 
     m.complete(p, GENERIC_PARAM_LIST);
 }

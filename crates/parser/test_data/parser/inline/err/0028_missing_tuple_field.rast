@@ -1,0 +1,28 @@
+SOURCE_FILE
+  STRUCT
+    STRUCT_KW "struct"
+    WHITESPACE " "
+    NAME
+      IDENT "S"
+    TUPLE_FIELD_LIST
+      L_PAREN "("
+      TUPLE_FIELD
+        PATH_TYPE
+          PATH
+            PATH_SEGMENT
+              NAME_REF
+                IDENT "i32"
+      COMMA ","
+      WHITESPACE " "
+      COMMA ","
+      WHITESPACE " "
+      TUPLE_FIELD
+        PATH_TYPE
+          PATH
+            PATH_SEGMENT
+              NAME_REF
+                IDENT "i32"
+      R_PAREN ")"
+    SEMICOLON ";"
+  WHITESPACE "\n"
+error 13: expected a type

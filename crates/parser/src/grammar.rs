@@ -395,9 +395,18 @@ fn delimited(
     delim: SyntaxKind,
     first_set: TokenSet,
     mut parser: impl FnMut(&mut Parser<'_>) -> bool,
+    missing_item_error_msg: &str,
 ) {
     p.bump(bra);
     while !p.at(ket) && !p.at(EOF) {
+        if p.at(delim) {
+            // Recover if an item is missing and only got a delimiter,
+            // e.g. `(a, , b)`.
+            p.error(missing_item_error_msg);
+            p.bump(delim);
+            continue;
+        }
+
         if !parser(p) {
             break;
         }

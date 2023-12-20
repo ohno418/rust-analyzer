@@ -149,25 +149,35 @@ const TUPLE_FIELD_FIRST: TokenSet =
 fn tuple_field_list(p: &mut Parser<'_>) {
     assert!(p.at(T!['(']));
     let m = p.start();
-    delimited(p, T!['('], T![')'], T![,], TUPLE_FIELD_FIRST, |p| {
-        let m = p.start();
-        // test tuple_field_attrs
-        // struct S (#[attr] f32);
-        attributes::outer_attrs(p);
-        let has_vis = opt_visibility(p, true);
-        if !p.at_ts(types::TYPE_FIRST) {
-            p.error("expected a type");
-            if has_vis {
-                m.complete(p, ERROR);
-            } else {
-                m.abandon(p);
+    delimited(
+        p,
+        T!['('],
+        T![')'],
+        T![,],
+        TUPLE_FIELD_FIRST,
+        |p| {
+            let m = p.start();
+            // test tuple_field_attrs
+            // struct S (#[attr] f32);
+            attributes::outer_attrs(p);
+            let has_vis = opt_visibility(p, true);
+            if !p.at_ts(types::TYPE_FIRST) {
+                p.error("expected a type");
+                if has_vis {
+                    m.complete(p, ERROR);
+                } else {
+                    m.abandon(p);
+                }
+                return false;
             }
-            return false;
-        }
-        types::type_(p);
-        m.complete(p, TUPLE_FIELD);
-        true
-    });
+            types::type_(p);
+            m.complete(p, TUPLE_FIELD);
+            true
+        },
+        // test_err missing_tuple_field
+        // struct S(i32, , i32);
+        "expected a type",
+    );
 
     m.complete(p, TUPLE_FIELD_LIST);
 }
