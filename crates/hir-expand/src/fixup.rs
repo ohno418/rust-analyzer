@@ -269,6 +269,23 @@ pub(crate) fn fixup_syntax(span_map: SpanMapRef<'_>, node: &SyntaxNode) -> Synta
                         ]);
                     }
                 },
+                ast::ArgList(it) => {
+                    // FIXME
+                    if it.args().next().is_none() {
+                        // FIXME
+                        // insert placeholder token after the left paren token
+                        let l_paren_token = match it.l_paren_token() {
+                            Some(t) => t,
+                            None => continue,
+                        };
+                        append.insert(l_paren_token.into(), vec![
+                            Leaf::Ident(Ident {
+                                text: "__ra_fixup".into(),
+                                span: fake_span(node_range)
+                            }),
+                        ]);
+                    }
+                },
                 _ => (),
             }
         }
@@ -621,7 +638,7 @@ fn foo () {a . b ; bar () ;}
     }
 
     #[test]
-    fn extraneous_comma() {
+    fn extraneous_comma_1() {
         check(
             r#"
 fn foo() {
@@ -629,7 +646,21 @@ fn foo() {
 }
 "#,
             expect![[r#"
-fn foo () {__ra_fixup ;}
+fn foo () {bar (__ra_fixup ,) ;}
+"#]],
+        )
+    }
+
+    #[test]
+    fn extraneous_comma_2() {
+        check(
+            r#"
+fn foo() {
+    bar(a, , b);
+}
+"#,
+            expect![[r#"
+fn foo () {bar (a, __ra_fixup, b) ;}
 "#]],
         )
     }
